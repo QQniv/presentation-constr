@@ -1,0 +1,300 @@
+# ============================================
+# Презентации — presets.yaml (v1)
+# Назначение: конфиг для клиента презентаций
+# Язык метаданных: ru
+# ============================================
+
+version: 1
+project: "Презентации"
+default_locale: "ru"
+assets_root: "./templates"        # базовая папка со всеми шаблонами
+preview_root: "./previews"        # (опционально) изображения превью
+output:
+  format: "pptx"                   # целевой формат по умолчанию
+  fallback_formats: ["pdf", "key"] # на случай экспорта через конвертер
+  filename_pattern: "{date}_{slug}_{style}.pptx"
+
+# ---------- глобальные правила авто-подбора ----------
+auto_select:
+  # Веса важности при выборе шаблона
+  weights:
+    audience_fit: 0.35     # соответствие аудитории (инвесторы, студенты и т.д.)
+    purpose_fit: 0.30      # цель (питч, защита курсача, отчет)
+    tone_fit: 0.20         # тональность/настроение
+    brand_fit: 0.10        # попадание в бренд (если задан)
+    complexity_fit: 0.05   # сложность/плотность макетов
+
+  # Связка тегов → предпочтительные стили
+  tag_style_map:
+    инвестиции: ["corporate", "vc", "tech-premium"]
+    академический_доклад: ["academic", "minimal"]
+    креатив: ["creative", "cinematic", "gradient"]
+    ESG: ["eco", "tech-premium", "corporate"]
+    государственный_отчет: ["gov", "strict"]
+    продуктовый_питч: ["startup", "demo-day", "tech-premium"]
+    маркетинг: ["marketing", "creative"]
+    учебный_проект: ["academic", "minimal"]
+
+  # Связка аудитории → палитры/тона
+  audience_prefs:
+    инвесторы:
+      preferred_tones: ["премиальный", "сдержанный", "технологичный"]
+      preferred_palettes: ["deep_blue", "graphite", "midnight"]
+    студенты:
+      preferred_tones: ["динамичный", "дружелюбный", "яркий"]
+      preferred_palettes: ["fresh", "citrus", "gradient_sunset"]
+    застройщики:
+      preferred_tones: ["премиальный", "надёжный", "экологичный"]
+      preferred_palettes: ["deep_blue", "forest", "aqua_clean"]
+
+# ---------- словари стилей, шрифтов и палитр ----------
+fonts:
+  # Назови шрифты так, как установлены у тебя/в шаблонах
+  montserrat:
+    heading: "Montserrat"
+    body: "Montserrat"
+    alt: ["Arial", "Helvetica", "sans-serif"]
+  inter:
+    heading: "Inter"
+    body: "Inter"
+    alt: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"]
+  poppins:
+    heading: "Poppins"
+    body: "Poppins"
+    alt: ["Arial", "sans-serif"]
+  roboto:
+    heading: "Roboto"
+    body: "Roboto"
+    alt: ["Arial", "sans-serif"]
+  impact_mix:
+    heading: "Impact"
+    body: "Inter"
+    alt: ["Haettenschweiler", "Arial Narrow Bold", "sans-serif"]
+
+palettes:
+  deep_blue: ["#0A1F33", "#1047A8", "#2B8CFF", "#EAF2FF", "#FFFFFF"]
+  graphite:  ["#111217", "#2B2F36", "#7A7E91", "#E5E8F2", "#FFFFFF"]
+  fresh:     ["#00B894", "#6C5CE7", "#F1FAFF", "#E5FFF4", "#FFFFFF"]
+  citrus:    ["#FFB703", "#FB8500", "#023047", "#E6F0F7", "#FFFFFF"]
+  forest:    ["#0B3D2E", "#1B7F5F", "#A3D9C9", "#ECFFF7", "#FFFFFF"]
+  aqua_clean:["#0E6BA8", "#1CA9C9", "#E0F7FA", "#F5FEFF", "#FFFFFF"]
+  gradient_sunset: ["#FF5C97", "#FFC371", "#FFEFE3", "#FFFFFF", "#1F1F1F"]
+  midnight:  ["#0F1020", "#1B1D3A", "#3B3E66", "#AEB3D1", "#FFFFFF"]
+
+styles:
+  corporate:
+    fonts: "inter"
+    palette: "deep_blue"
+    tone: ["премиальный", "сдержанный", "технологичный"]
+  tech-premium:
+    fonts: "inter"
+    palette: "midnight"
+    tone: ["премиальный", "технологичный", "лаконичный"]
+  academic:
+    fonts: "roboto"
+    palette: "graphite"
+    tone: ["деловой", "структурный", "лаконичный"]
+  creative:
+    fonts: "poppins"
+    palette: "gradient_sunset"
+    tone: ["яркий", "динамичный", "визуальный"]
+  eco:
+    fonts: "montserrat"
+    palette: "aqua_clean"
+    tone: ["экологичный", "доброжелательный", "чистый"]
+  minimal:
+    fonts: "inter"
+    palette: "graphite"
+    tone: ["минимализм", "спокойный", "читаемый"]
+  startup:
+    fonts: "poppins"
+    palette: "fresh"
+    tone: ["энергичный", "современный", "смелый"]
+  gov:
+    fonts: "roboto"
+    palette: "graphite"
+    tone: ["официальный", "строгий", "консервативный"]
+  marketing:
+    fonts: "poppins"
+    palette: "citrus"
+    tone: ["привлекающий", "контрастный", "жизнерадостный"]
+
+# ---------- словарь типов слайдов (компонентов) ----------
+slide_types:
+  cover:
+    required_blocks: ["title", "subtitle", "branding"]
+    optional_blocks: ["image", "bg_video", "metrics"]
+  section:
+    required_blocks: ["section_title"]
+    optional_blocks: ["tagline"]
+  bullets:
+    required_blocks: ["title", "bullets"]
+    optional_blocks: ["illustration", "notes"]
+  two_column:
+    required_blocks: ["title", "col_left", "col_right"]
+    optional_blocks: ["legend"]
+  chart:
+    required_blocks: ["title", "chart_data"]
+    optional_blocks: ["source", "insight"]
+  timeline:
+    required_blocks: ["title", "stages"]
+    optional_blocks: ["summary"]
+  quote:
+    required_blocks: ["quote_text", "author"]
+  image_focus:
+    required_blocks: ["title", "image"]
+    optional_blocks: ["caption"]
+  closing:
+    required_blocks: ["title", "cta"]
+    optional_blocks: ["contacts", "qr"]
+
+# ---------- правила разметки данных слайдов ----------
+data_schema:
+  fields:
+    title: "string"
+    subtitle: "string"
+    bullets: "string[]"
+    chart_data: "table|series"
+    source: "string"
+    insight: "string"
+    stages: "array<object: {label, date?, text?}>"
+    col_left: "markdown"
+    col_right: "markdown"
+    quote_text: "string"
+    author: "string"
+    image: "path|url"
+    caption: "string"
+    branding: "object: {logo?, brand_name?}"
+    contacts: "object: {email?, phone?, link?}"
+    cta: "string"
+  # Мягкая валидация (подсказки движку)
+  rules:
+    max_bullets_per_slide: 6
+    target_read_time_sec_per_slide: 30
+    avoid_small_text: true
+
+# ---------- дефолтные макеты для авто-сборки ----------
+default_flows:
+  investor_pitch:
+    slides: ["cover", "section", "problem", "solution", "product", "market", "business_model", "traction", "team", "closing"]
+    map:
+      problem: "bullets"
+      solution: "two_column"
+      product: "image_focus"
+      market: "chart"
+      business_model: "two_column"
+      traction: "chart"
+      team: "image_focus"
+  academic_defense:
+    slides: ["cover", "section", "goals", "methods", "results", "discussion", "conclusion", "closing"]
+    map:
+      goals: "bullets"
+      methods: "two_column"
+      results: "chart"
+      discussion: "bullets"
+      conclusion: "quote"
+
+# ---------- каталог шаблонов ----------
+# Добавляй сюда свои `.pptx` (или иные) по образцу.
+templates:
+  - id: "fs_tech_premium_v1"
+    name: "FS • Tech Premium"
+    path: "./corporate/fs-tech-premium.pptx"
+    style: "tech-premium"
+    palette_override: null
+    fonts_override: "inter"
+    tags: ["ESG", "застройщики", "инвестиции", "вода", "инфраструктура"]
+    audience: ["инвесторы", "застройщики", "B2B"]
+    density: "medium"      # low|medium|high — плотность контента
+    thumb: "./corporate/previews/fs-tech-premium.jpg"
+    preferred_flows: ["investor_pitch", "academic_defense"]
+
+  - id: "corporate_blue_minimal"
+    name: "Blue Tech Corporate"
+    path: "./corporate/blue-tech.pptx"
+    style: "corporate"
+    tags: ["инвестиции", "отчет", "корпоратив"]
+    audience: ["инвесторы", "менеджмент"]
+    density: "medium"
+    thumb: "./corporate/previews/blue-tech.jpg"
+
+  - id: "academic_graphite_clean"
+    name: "Academic Graphite"
+    path: "./academic/academic-graphite.pptx"
+    style: "academic"
+    tags: ["академический_доклад", "исследование", "курсоваЯ"]
+    audience: ["преподаватели", "студенты"]
+    density: "high"
+    thumb: "./academic/previews/graphite.jpg"
+
+  - id: "creative_gradient_flow"
+    name: "Gradient Flow"
+    path: "./creative/gradient-flow.pptx"
+    style: "creative"
+    tags: ["креатив", "маркетинг", "портфолио"]
+    audience: ["маркетинг", "студенты"]
+    density: "low"
+    thumb: "./creative/previews/gradient.jpg"
+
+  - id: "eco_aqua_clean"
+    name: "Eco Aqua Clean"
+    path: "./corporate/eco-aqua-clean.pptx"
+    style: "eco"
+    tags: ["ESG", "экология", "вода", "отчет"]
+    audience: ["застройщики", "муниципалитет", "инвесторы"]
+    density: "medium"
+
+  - id: "startup_fresh_pitch"
+    name: "Startup Fresh Pitch"
+    path: "./startup/fresh-pitch.pptx"
+    style: "startup"
+    tags: ["продуктовый_питч", "demo_day", "маркетинг"]
+    audience: ["инвесторы", "партнеры"]
+    density: "low"
+
+  - id: "gov_strict_report"
+    name: "Gov Strict Report"
+    path: "./gov/gov-strict-report.pptx"
+    style: "gov"
+    tags: ["государственный_отчет", "официальный", "тендер"]
+    audience: ["ведомства", "управленцы"]
+    density: "high"
+
+  - id: "marketing_citrus_boost"
+    name: "Marketing Citrus Boost"
+    path: "./marketing/citrus-boost.pptx"
+    style: "marketing"
+    tags: ["маркетинг", "кампания", "реклама"]
+    audience: ["маркетинг", "бренд-команда"]
+    density: "medium"
+
+  # ---- заготовки для массовой загрузки (скопируй и меняй) ----
+  # - id: "category_slug_unique_001"
+  #   name: "ЧИТАЕМОЕ НАЗВАНИЕ"
+  #   path: "./<category>/<file>.pptx"
+  #   style: "<см. styles выше>"
+  #   tags: ["...", "..."]
+  #   audience: ["..."]
+  #   density: "low|medium|high"
+  #   thumb: "./<category>/previews/<file>.jpg"
+
+# ---------- бренд-профили (опционально) ----------
+brands:
+  FS:
+    logo: "./brand/fs_logo_dark.png"
+    primary_style: "tech-premium"
+    allowed_palettes: ["deep_blue", "aqua_clean", "midnight"]
+    disallowed_styles: ["creative"]
+    typography: "inter"
+
+# ---------- преднастройки тона и скорости анимаций (если шаблон поддерживает) ----------
+motion_presets:
+  subtle:
+    transitions: "fast"
+    emphasis: "low"
+  premium:
+    transitions: "normal"
+    emphasis: "medium"
+  cinematic:
+    transitions: "slow"
+    emphasis: "high"

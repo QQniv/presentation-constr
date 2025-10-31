@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Клиент презентаций</title>
 
-  <!-- Подключаем YAML-парсер -->
+  <!-- YAML-парсер -->
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <!-- Генератор PPTX -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
   <style>
@@ -20,7 +21,6 @@
       --shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
       --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }
-
     body {
       margin: 0;
       background: var(--bg);
@@ -30,7 +30,6 @@
       flex-direction: column;
       min-height: 100vh;
     }
-
     header {
       background: var(--card-bg);
       box-shadow: var(--shadow);
@@ -38,27 +37,23 @@
       font-weight: 600;
       font-size: 1.25rem;
     }
-
     main {
       flex: 1;
       padding: 2rem;
       max-width: 1100px;
       margin: 0 auto;
     }
-
     h1 {
       font-weight: 700;
       font-size: 1.8rem;
       margin-bottom: 1rem;
     }
-
     .filters {
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
       margin-bottom: 2rem;
     }
-
     select, input {
       padding: 0.6rem 1rem;
       border-radius: var(--radius);
@@ -68,7 +63,6 @@
       font-size: 1rem;
       outline: none;
     }
-
     button {
       padding: 0.7rem 1.4rem;
       border: none;
@@ -79,16 +73,12 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    button:hover {
-      background: #195ee9;
-    }
-
+    button:hover { background: #195ee9; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1.5rem;
     }
-
     .card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -96,11 +86,7 @@
       overflow: hidden;
       transition: transform 0.2s ease;
     }
-
-    .card:hover {
-      transform: translateY(-4px);
-    }
-
+    .card:hover { transform: translateY(-4px); }
     .thumb {
       width: 100%;
       height: 180px;
@@ -111,19 +97,15 @@
       color: var(--muted);
       font-size: 0.9rem;
       font-weight: 500;
+      object-fit: cover;
     }
-
-    .content {
-      padding: 1rem 1.2rem;
-    }
-
+    .content { padding: 1rem 1.2rem; }
     .taglist {
       margin-top: 0.4rem;
       display: flex;
       flex-wrap: wrap;
       gap: 0.4rem;
     }
-
     .tag {
       background: #eef3fb;
       color: var(--accent);
@@ -131,12 +113,21 @@
       font-size: 0.8rem;
       padding: 0.2rem 0.6rem;
     }
-
     footer {
       text-align: center;
       font-size: 0.9rem;
       color: var(--muted);
       padding: 1rem;
+    }
+    .actions { margin-top: .8rem; display:flex; gap:.5rem; flex-wrap:wrap; }
+    textarea {
+      width: 100%;
+      height: 260px;
+      border: 1px solid #d5dae2;
+      border-radius: 12px;
+      padding: .8rem;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      background:#fff;
     }
   </style>
 </head>
@@ -167,46 +158,135 @@
 
   <footer>© 2025 Презентации</footer>
 
+  <!-- твой загрузчик YAML + фильтрация -->
   <script src="scripts/loader.js"></script>
 
-  <script>
-    const resultsEl = document.getElementById("results");
-    const btn = document.getElementById("search");
+  <!-- модуль: выбор шаблона + генерация PPTX -->
+  <script type="module">
+    import { generateFromForm } from './scripts/generator.js';
 
-    async function runSearch() {
-      const audience = document.getElementById("audience").value ? [document.getElementById("audience").value] : [];
-      const purpose = document.getElementById("purpose").value.trim();
-      const tags = document.getElementById("tags").value.split(",").map(t => t.trim()).filter(Boolean);
+    const resultsEl = document.getElementById('results');
+    const btn = document.getElementById('search');
 
-      const config = await loadPresets();
-      const found = findTemplates(config, { audience, purpose, tags });
-      resultsEl.innerHTML = "";
+    let cachedConfig = null;
+    let lastSelectedTemplate = null;
 
+    async function ensureConfig() {
+      if (!cachedConfig) cachedConfig = await loadPresets();
+      return cachedConfig;
+    }
+
+    function renderCards(found) {
+      resultsEl.innerHTML = '';
       if (!found.length) {
-        resultsEl.innerHTML = "<p>Ничего не найдено 🫥</p>";
+        resultsEl.innerHTML = '<p>Ничего не найдено 🫥</p>';
         return;
       }
-
-      for (const t of found) {
-        const card = document.createElement("div");
-        card.className = "card";
+      found.forEach((t, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
         const thumb = t.thumb
           ? `<img src="${t.thumb}" alt="${t.name}" class="thumb" />`
           : `<div class="thumb">Без превью</div>`;
-        const tagsHTML = (t.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("");
+        const tagsHTML = (t.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('');
         card.innerHTML = `
           ${thumb}
           <div class="content">
             <h3>${t.name}</h3>
             <p style="color:var(--muted);font-size:0.9rem;">${t.style}</p>
             <div class="taglist">${tagsHTML}</div>
+            <div class="actions">
+              <button data-choose="${i}">Выбрать этот</button>
+            </div>
           </div>
         `;
         resultsEl.appendChild(card);
-      }
+      });
+
+      resultsEl.querySelectorAll('button[data-choose]').forEach(b => {
+        b.addEventListener('click', e => {
+          const idx = parseInt(e.currentTarget.getAttribute('data-choose'), 10);
+          lastSelectedTemplate = found[idx];
+          renderComposer();
+        });
+      });
     }
 
-    btn.addEventListener("click", runSearch);
+    function renderComposer() {
+      // Удалим старый композер, если был
+      const old = document.getElementById('composer');
+      if (old) old.remove();
+
+      const wrap = document.createElement('div');
+      wrap.id = 'composer';
+      wrap.className = 'card';
+      wrap.style.padding = '1rem 1.2rem';
+      wrap.style.gridColumn = '1 / -1';
+      wrap.innerHTML = `
+        <h3 style="margin:0 0 .6rem 0">Контент презентации (JSON)</h3>
+        <p style="margin:.2rem 0 .8rem 0;color:var(--muted);font-size:.95rem">
+          Схема: { "fileName": "...", "title": "...", "subtitle": "...", "slides":[
+            { "type":"bullets","title":"...","bullets":["..."] },
+            { "type":"two_column","title":"...","col_left":"...","col_right":"..." },
+            { "type":"quote","quote_text":"...","author":"..." },
+            { "type":"closing","title":"Спасибо!","cta":"Вопросы?" }
+          ]}
+        </p>
+        <textarea id="content-json"></textarea>
+        <div class="actions">
+          <button id="use-demo">Вставить пример</button>
+          <button id="build-pptx" style="background:#0ea5e9">Собрать .pptx</button>
+        </div>
+      `;
+      resultsEl.appendChild(wrap);
+
+      const demo = {
+        fileName: "demo_presentation",
+        title: "Проблемы денежного обращения в современной России",
+        subtitle: "Соотношение наличных и безналичных, цифровой рубль, статистика ЦБ",
+        slides: [
+          { type: "section", title: "Динамика наличных и безналичных расчётов" },
+          { type: "bullets", title: "Ключевые факты", bullets: [
+            "2018: ~70% безнала (по числу операций)",
+            "2023: ~86.5%",
+            "Экспансия безналичных платежей"
+          ]},
+          { type: "two_column", title: "Цифровой рубль",
+            col_left: "Задачи: скорость, прозрачность, снижение издержек",
+            col_right: "Риски: кибербезопасность, приватность, принятие рынком"
+          },
+          { type: "quote", quote_text: "Деньги — это договор доверия", author: "Анонимный экономист" },
+          { type: "closing", title: "Спасибо!", cta: "Вопросы?" }
+        ]
+      };
+
+      const ta = wrap.querySelector('#content-json');
+      wrap.querySelector('#use-demo').addEventListener('click', () => {
+        ta.value = JSON.stringify(demo, null, 2);
+      });
+      wrap.querySelector('#build-pptx').addEventListener('click', async () => {
+        if (!lastSelectedTemplate) {
+          alert('Сначала выбери шаблон.');
+          return;
+        }
+        const cfg = await ensureConfig();
+        await generateFromForm(cfg, lastSelectedTemplate, ta.value || "{}");
+      });
+    }
+
+    async function runSearch() {
+      const audience = document.getElementById('audience').value
+        ? [document.getElementById('audience').value] : [];
+      const purpose = document.getElementById('purpose').value.trim();
+      const tags = document.getElementById('tags').value
+        .split(',').map(t => t.trim()).filter(Boolean);
+
+      const config = await ensureConfig();
+      const found = findTemplates(config, { audience, purpose, tags });
+      renderCards(found);
+    }
+
+    btn.addEventListener('click', runSearch);
   </script>
 </body>
 </html>
